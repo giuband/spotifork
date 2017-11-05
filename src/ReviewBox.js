@@ -1,10 +1,20 @@
 import React from 'react';
 import { shape, string, bool, func } from 'prop-types';
-import styled, { css } from 'styled-components';
+import styled, { css, keyframes } from 'styled-components';
 import { SERVER_URL } from './constants';
 
 const ART_SIZE = '240px';
 const SCORE_SIZE = '30px';
+
+const appearAnimation = keyframes`
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  } to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+`;
 
 const StyledReviewBox = styled.li`
   flex-basis: ${ART_SIZE};
@@ -15,6 +25,8 @@ const StyledReviewBox = styled.li`
   padding-bottom: 5px;
 
   ${props => props.expanded && css`box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);`};
+
+  animation: ${appearAnimation} 0.5s ease-out;
 `;
 
 const Artist = styled.h3`
