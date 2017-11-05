@@ -36,7 +36,7 @@ class App extends Component {
 
   getInitialPagesContent() {
     const callbacks = [...new Array(this.state.initialPagesToFetch)].map((_, index) =>
-      this.getReviewsForPage(index + 1),
+      this.getReviewsForPage(index + 1)
     );
     return callbacks.reduce((prev, cur) => prev.then(cur), Promise.resolve());
   }

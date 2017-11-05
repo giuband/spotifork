@@ -1,2 +1,2 @@
 export const SERVER_URL =
-  process.env.SERVER === 'webpack-dev' ? 'http://localhost:5000' : window.location.origin;
+  process.env.NODE_ENV === 'production' ? window.location.origin : 'http://localhost:5000';
