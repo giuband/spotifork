@@ -1,4 +1,5 @@
 import React from 'react';
+import { shape, string, bool } from 'prop-types';
 import styled from 'styled-components';
 import { SERVER_URL } from './constants';
 
@@ -54,25 +55,64 @@ const Score = styled.div`
 `;
 
 class ReviewBox extends React.Component {
+  static propTypes = {
+    review: shape({
+      url: string,
+      artist: string,
+      album: string,
+    }),
+    isExpanded: bool,
+  };
+
+  state = {
+    spotifyUri: '',
+    error: null,
+  };
+
   constructor(props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
   }
 
   handleClick() {
+    const { spotifyUri, error } = this.state;
     const { review } = this.props;
     this.props.onExpandReview(review.url);
-    fetch(`${SERVER_URL}/search?artist=${review.artist}&album=${review.album}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data.uri) {
-          this.props.onGetSpotifyUri(data.uri);
-        }
-      });
+    if (!spotifyUri && !error) {
+      fetch(`${SERVER_URL}/search?artist=${review.artist}&album=${review.album}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.uri) {
+            this.setState({ spotifyUri: data.uri });
+          } else {
+            this.setState({ error: 'Album not available on Spotify' });
+          }
+        });
+    }
+  }
+
+  renderExpandedSection() {
+    const { spotifyUri, error } = this.state;
+    if (error) {
+      return <h3>{error}</h3>;
+    }
+    if (spotifyUri) {
+      return (
+        <iframe
+          src={`https://open.spotify.com/embed?uri=${spotifyUri}&view=coverart`}
+          width="100%"
+          height="80"
+          frameBorder="0"
+          allowTransparency="true"
+          title="spotify-player"
+        />
+      );
+    }
+    return null;
   }
 
   render() {
-    const { review, isExpanded, spotifyUri } = this.props;
+    const { review, isExpanded } = this.props;
     return (
       <StyledReviewBox
         role="button"
@@ -89,17 +129,7 @@ class ReviewBox extends React.Component {
         </CoverArt>
         <Artist>{review.artist}</Artist>
         <Title>{review.album}</Title>
-        {isExpanded &&
-          spotifyUri && (
-            <iframe
-              src={`https://open.spotify.com/embed?uri=${spotifyUri}&view=coverart`}
-              width="100%"
-              height="80"
-              frameBorder="0"
-              allowTransparency="true"
-              title="spotify-player"
-            />
-          )}
+        {isExpanded && this.renderExpandedSection()}
       </StyledReviewBox>
     );
   }

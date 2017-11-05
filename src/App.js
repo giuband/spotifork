@@ -26,7 +26,6 @@ class App extends Component {
     this.addReviews = this.addReviews.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
     this.handleExpandReview = this.handleExpandReview.bind(this);
-    this.handleGetSpotifyUri = this.handleGetSpotifyUri.bind(this);
   }
 
   componentDidMount() {
@@ -54,10 +53,6 @@ class App extends Component {
     this.setState({ expandedReviewUrl: reviewUrl });
   }
 
-  handleGetSpotifyUri(spotifyUri) {
-    this.setState({ spotifyUri });
-  }
-
   getReviewsForPage(pageIndex) {
     const getReviewsUrl = `${SERVER_URL}/getPage/${pageIndex}`;
     this.setState({ isFetching: true });
@@ -74,7 +69,7 @@ class App extends Component {
   }
 
   render() {
-    const { expandedReviewUrl, spotifyUri } = this.state;
+    const { expandedReviewUrl } = this.state;
     return (
       <StyledApp>
         <ReviewsContainer>
@@ -83,7 +78,6 @@ class App extends Component {
               review={review}
               key={review.url}
               isExpanded={expandedReviewUrl === review.url}
-              spotifyUri={spotifyUri}
               onExpandReview={this.handleExpandReview}
               onGetSpotifyUri={this.handleGetSpotifyUri}
             />
