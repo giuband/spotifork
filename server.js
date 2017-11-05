@@ -24,10 +24,10 @@ request(
     method: 'POST',
     headers: {
       Authorization: `Basic ${authToken}`,
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     json: true,
-    body: 'grant_type=client_credentials'
+    body: 'grant_type=client_credentials',
   },
   (err, response) => {
     accessToken = response.body.access_token;
@@ -62,12 +62,12 @@ app.get('/search', (req, res) => {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      json: true
+      json: true,
     },
     (err, response) => {
-      const result = response.body.albums.items[0];
+      const result = response.body.albums && response.body.albums.items[0];
       if (result) {
         res.json(result);
       } else {
