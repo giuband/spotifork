@@ -1,14 +1,23 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { SERVER_URL } from './constants';
+import { throttle } from 'lodash';
+
+import { SERVER_URL, RIGHT_SIDEBAR_WIDTH } from './constants';
+
+import Aside from './Aside';
 import ReviewBox from './ReviewBox';
 import ReviewsContainer from './ReviewsContainer';
 import Fetching from './Fetching';
-import { throttle } from 'lodash';
 
 const StyledApp = styled.div`
   padding: 30px;
   font-family: Lora, sans-serif;
+  display: flex;
+`;
+
+const Main = styled.main`
+  padding-right: ${RIGHT_SIDEBAR_WIDTH};
+  flex-grow: 1;
 `;
 
 class App extends Component {
@@ -26,6 +35,7 @@ class App extends Component {
     this.addReviews = this.addReviews.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
     this.handleExpandReview = this.handleExpandReview.bind(this);
+    this.handleUpdateActiveAlbum = this.handleUpdateActiveAlbum.bind(this);
   }
 
   componentDidMount() {
@@ -53,6 +63,10 @@ class App extends Component {
     this.setState({ expandedReviewUrl: reviewUrl });
   }
 
+  handleUpdateActiveAlbum({ spotifyUri, review }) {
+    this.setState({ spotifyUri, activeReview: review });
+  }
+
   getReviewsForPage(pageIndex) {
     const getReviewsUrl = `${SERVER_URL}/getPage/${pageIndex}`;
     this.setState({ isFetching: true });
@@ -69,21 +83,25 @@ class App extends Component {
   }
 
   render() {
-    const { expandedReviewUrl } = this.state;
+    const { expandedReviewUrl, spotifyUri, activeReview } = this.state;
     return (
       <StyledApp>
-        <ReviewsContainer>
-          {this.state.reviews.map(review => (
-            <ReviewBox
-              review={review}
-              key={review.url}
-              isExpanded={expandedReviewUrl === review.url}
-              onExpandReview={this.handleExpandReview}
-              onGetSpotifyUri={this.handleGetSpotifyUri}
-            />
-          ))}
-        </ReviewsContainer>
-        {this.state.isFetching && <Fetching />}
+        <Main>
+          <ReviewsContainer>
+            {this.state.reviews.map(review => (
+              <ReviewBox
+                review={review}
+                key={review.url}
+                isExpanded={expandedReviewUrl === review.url}
+                onExpandReview={this.handleExpandReview}
+                onGetSpotifyUri={this.handleGetSpotifyUri}
+                onUpdateActiveAlbum={this.handleUpdateActiveAlbum}
+              />
+            ))}
+          </ReviewsContainer>
+          {this.state.isFetching && <Fetching />}
+        </Main>
+        <Aside spotifyUri={spotifyUri} activeReview={activeReview} />
       </StyledApp>
     );
   }

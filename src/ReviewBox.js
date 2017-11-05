@@ -1,16 +1,20 @@
 import React from 'react';
-import { shape, string, bool } from 'prop-types';
-import styled from 'styled-components';
+import { shape, string, bool, func } from 'prop-types';
+import styled, { css } from 'styled-components';
 import { SERVER_URL } from './constants';
 
-const ART_SIZE = '200px';
+const ART_SIZE = '240px';
 const SCORE_SIZE = '30px';
 
-const StyledReviewBox = styled.section`
+const StyledReviewBox = styled.li`
   flex-basis: ${ART_SIZE};
   margin-right: 10px;
   margin-bottom: 20px;
   margin-left: 10px;
+  cursor: pointer;
+  padding-bottom: 5px;
+
+  ${props => props.expanded && css`box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);`};
 `;
 
 const Artist = styled.h3`
@@ -54,6 +58,26 @@ const Score = styled.div`
   padding: 4px;
 `;
 
+const ReadReviewLink = styled.a`
+  display: block;
+  text-align: center;
+  color: #ff490e;
+  margin-top: 10px;
+  font-family: Lora, sans-serif;
+  font-size: 10px;
+`;
+
+const Iframe = styled.iframe`
+  display: block;
+  margin: 0 auto;
+`;
+
+const NotAvailableError = styled.h3`
+  text-align: center;
+  width: 90%;
+  margin: 0 auto;
+`;
+
 class ReviewBox extends React.Component {
   static propTypes = {
     review: shape({
@@ -62,6 +86,7 @@ class ReviewBox extends React.Component {
       album: string,
     }),
     isExpanded: bool,
+    onUpdateActiveAlbum: func,
   };
 
   state = {
@@ -76,16 +101,22 @@ class ReviewBox extends React.Component {
 
   handleClick() {
     const { spotifyUri, error } = this.state;
-    const { review } = this.props;
+    const { review, onUpdateActiveAlbum } = this.props;
     this.props.onExpandReview(review.url);
-    if (!spotifyUri && !error) {
+    if (spotifyUri) {
+      onUpdateActiveAlbum({ spotifyUri, review });
+    } else if (error) {
+      onUpdateActiveAlbum({ review });
+    } else {
       fetch(`${SERVER_URL}/search?artist=${review.artist}&album=${review.album}`)
         .then(response => response.json())
         .then(data => {
           if (data.uri) {
             this.setState({ spotifyUri: data.uri });
+            onUpdateActiveAlbum({ spotifyUri: data.uri, review });
           } else {
             this.setState({ error: 'Album not available on Spotify' });
+            onUpdateActiveAlbum({ review });
           }
         });
     }
@@ -93,20 +124,33 @@ class ReviewBox extends React.Component {
 
   renderExpandedSection() {
     const { spotifyUri, error } = this.state;
+    const { review } = this.props;
+    const readReview = (
+      <ReadReviewLink
+        key="review-link"
+        href={`https://pitchfork.com${review.url}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Read review
+      </ReadReviewLink>
+    );
     if (error) {
-      return <h3>{error}</h3>;
+      return [<NotAvailableError key="error">{error}</NotAvailableError>, readReview];
     }
     if (spotifyUri) {
-      return (
-        <iframe
+      return [
+        <Iframe
+          key="spotify-iframe"
           src={`https://open.spotify.com/embed?uri=${spotifyUri}&view=coverart`}
-          width="100%"
+          width="90%"
           height="80"
           frameBorder="0"
           allowTransparency="true"
           title="spotify-player"
-        />
-      );
+        />,
+        readReview,
+      ];
     }
     return null;
   }
@@ -123,6 +167,7 @@ class ReviewBox extends React.Component {
             this.handleClick();
           }
         }}
+        expanded={isExpanded}
       >
         <CoverArt src={review.cover}>
           <Score>{review.score}</Score>

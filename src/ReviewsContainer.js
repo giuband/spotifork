@@ -1,12 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const StyledContainer = styled.main`
+const StyledContainer = styled.ul`
   display: flex;
   flex-wrap: wrap;
   max-width: 880px;
   margin-left: auto;
   margin-right: auto;
+  list-style: none;
 `;
 
 const ReviewsContainer = ({ children }) => {
