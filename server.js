@@ -3,6 +3,8 @@ const express = require('express');
 const request = require('request');
 const path = require('path');
 
+const { get } = require('lodash')
+
 const { CLIENT_ID, CLIENT_SECRET } = require('./keys');
 
 const app = express();
@@ -18,21 +20,28 @@ function btoa(str) {
 
 const authToken = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`);
 
-request(
-  {
-    url: 'https://accounts.spotify.com/api/token',
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${authToken}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
+const updateAccessToken = () => new Promise((resolve, reject) => {
+  request(
+    {
+      url: 'https://accounts.spotify.com/api/token',
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${authToken}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      json: true,
+      body: 'grant_type=client_credentials',
     },
-    json: true,
-    body: 'grant_type=client_credentials',
-  },
-  (err, response) => {
-    accessToken = response.body.access_token;
-  }
-);
+    (err, response) => {
+      if (err) {
+        reject()
+      } else {
+        accessToken = response.body.access_token;
+        resolve()
+      }
+    }
+  );
+})
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
@@ -71,6 +80,11 @@ app.get('/search', (req, res) => {
       if (result) {
         res.json(result);
       } else {
+        const hasTokenExpired = get(response, 'body.error.message') === 'The access token expired'
+        if (hasTokenExpired) {
+          updateAccessToken()
+        }
+        console.log('error', err, response)
         res.json({ error: 'Not available on spotify' });
       }
     }
@@ -84,3 +98,5 @@ app.get('/', (req, res) => {
 app.listen(5000, function() {
   console.log('Example app listening on port 5000!');
 });
+
+updateAccessToken()
