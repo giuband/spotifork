@@ -1,5 +1,6 @@
 import React from 'react';
 import { shape, string, bool, func } from 'prop-types';
+import { get } from 'lodash';
 import styled, { css, keyframes } from 'styled-components';
 import { SERVER_URL } from './constants';
 
@@ -126,7 +127,7 @@ class ReviewBox extends React.Component {
           if (data.uri) {
             this.setState({ spotifyUri: data.uri });
             onUpdateActiveAlbum({ spotifyUri: data.uri, review });
-          } else {
+          } else if (get(data, 'error') === 'Not available on spotify') {
             this.setState({ error: 'Album not available on Spotify' });
             onUpdateActiveAlbum({ review });
           }
