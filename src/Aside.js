@@ -32,8 +32,8 @@ class Aside extends React.Component {
             src={`https://open.spotify.com/embed?uri=${spotifyUri}`}
             width="300"
             height="380"
-            frameborder="0"
-            allowtransparency="true"
+            frameBorder="0"
+            allowTransparency
           />
         )}
         {activeReview && (
