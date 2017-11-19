@@ -104,6 +104,7 @@ class ReviewBox extends React.Component {
 
   state = {
     spotifyUri: '',
+    spotifyData: null,
     error: null,
   };
 
@@ -125,7 +126,7 @@ class ReviewBox extends React.Component {
         .then(response => response.json())
         .then(data => {
           if (data.uri) {
-            this.setState({ spotifyUri: data.uri });
+            this.setState({ spotifyUri: data.uri, spotifyData: data });
             onUpdateActiveAlbum({ spotifyUri: data.uri, review });
           } else if (get(data, 'error') === 'Not available on spotify') {
             this.setState({ error: 'Album not available on Spotify' });

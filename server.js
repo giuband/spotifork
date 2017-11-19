@@ -1,4 +1,4 @@
-const p = require('pitchfork');
+const pitchfork = require('pitchfork');
 const express = require('express');
 const request = require('request');
 const path = require('path');
@@ -46,17 +46,28 @@ const updateAccessToken = () =>
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
   next();
 });
 
 app.param('page', (req, res, next, page) => {
-  const s = new p.Page(page);
-  s.on('ready', () => {
-    const { results } = s;
-    const reviews = results.map(res => res.attributes);
-    res.json({ reviews });
-  });
+  try {
+    const pitchforkRequest = new pitchfork.Page(page);
+    pitchforkRequest.on('ready', () => {
+      const { results } = pitchforkRequest;
+      const reviews = results.map(res => res.attributes);
+      res.json({ reviews });
+    });
+  } catch (err) {
+    res
+      .status(500)
+      .send({
+        error: 'There was an error while fetching data from pitchfork ',
+      });
+  }
 });
 
 app.get('/getPage/:page', (req, res, next) => {
@@ -81,7 +92,8 @@ app.get('/search', (req, res) => {
       if (result) {
         res.json(result);
       } else {
-        const hasTokenExpired = get(response, 'body.error.message') === 'The access token expired';
+        const hasTokenExpired =
+          get(response, 'body.error.message') === 'The access token expired';
         if (hasTokenExpired) {
           updateAccessToken();
           res.json({ error: 'Expired token' });

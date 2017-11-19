@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { throttle } from 'lodash';
+import { throttle, times } from 'lodash';
 
 import { SERVER_URL, RIGHT_SIDEBAR_WIDTH } from './constants';
 
@@ -28,6 +28,7 @@ class App extends Component {
     initialPagesToFetch: 2,
     expandedReviewUrl: '',
     spotifyUri: '',
+    error: '',
   };
 
   constructor() {
@@ -44,8 +45,9 @@ class App extends Component {
   }
 
   getInitialPagesContent() {
-    const callbacks = [...new Array(this.state.initialPagesToFetch)].map((_, index) =>
-      this.getReviewsForPage(index + 1)
+    const totalFetches = this.state.initialPagesToFetch;
+    const callbacks = times(totalFetches).map(i =>
+      this.getReviewsForPage(i + 1)
     );
     return callbacks.reduce((prev, cur) => prev.then(cur), Promise.resolve());
   }
@@ -74,7 +76,14 @@ class App extends Component {
       .then(response => response.json())
       .then(data => {
         this.addReviews(data);
-        this.setState({ fetchedPages: this.state.fetchedPages + 1, isFetching: false });
+        this.setState({
+          fetchedPages: this.state.fetchedPages + 1,
+          isFetching: false,
+          error: '',
+        });
+      })
+      .catch(error => {
+        this.setState({ isFetching: false, error });
       });
   }
 
@@ -100,6 +109,7 @@ class App extends Component {
             ))}
           </ReviewsContainer>
           {this.state.isFetching && <Fetching />}
+          {this.state.error && <h2>{this.state.error}</h2>}
         </Main>
         <Aside spotifyUri={spotifyUri} activeReview={activeReview} />
       </StyledApp>
