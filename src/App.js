@@ -1,23 +1,25 @@
 import React, { Component } from 'react';
-import styled from 'styled-components';
-import { throttle, times } from 'lodash';
+import styled, { injectGlobal } from 'styled-components';
+import { throttle, times, isEmpty } from 'lodash';
 
-import { SERVER_URL, RIGHT_SIDEBAR_WIDTH } from './constants';
+import { SERVER_URL, CONTENT_WIDTH } from './constants';
 
-import Aside from './Aside';
+import Navbar from './Navbar';
 import ReviewBox from './ReviewBox';
-import ReviewsContainer from './ReviewsContainer';
+import ReviewsWrapper from './ReviewsWrapper';
 import Fetching from './Fetching';
 
-const StyledApp = styled.div`
-  padding: 30px;
-  font-family: Lora, sans-serif;
-  display: flex;
-`;
+injectGlobal`
+  body { 
+    font-size: 16px;
+  }
+`
 
 const Main = styled.main`
-  padding-right: ${RIGHT_SIDEBAR_WIDTH};
-  flex-grow: 1;
+  margin-top: 40px;
+  margin-bottom: 40px;
+
+  ${CONTENT_WIDTH}
 `;
 
 class App extends Component {
@@ -82,7 +84,7 @@ class App extends Component {
           error: '',
         });
       })
-      .catch(error => {
+      .catch(({ error }) => {
         this.setState({ isFetching: false, error });
       });
   }
@@ -93,27 +95,25 @@ class App extends Component {
 
   render() {
     const { expandedReviewUrl, spotifyUri, activeReview } = this.state;
-    return (
-      <StyledApp>
-        <Main>
-          <ReviewsContainer>
-            {this.state.reviews.map(review => (
-              <ReviewBox
-                review={review}
-                key={review.url}
-                isExpanded={expandedReviewUrl === review.url}
-                onExpandReview={this.handleExpandReview}
-                onGetSpotifyUri={this.handleGetSpotifyUri}
-                onUpdateActiveAlbum={this.handleUpdateActiveAlbum}
-              />
-            ))}
-          </ReviewsContainer>
-          {this.state.isFetching && <Fetching />}
-          {this.state.error && <h2>{this.state.error}</h2>}
-        </Main>
-        <Aside spotifyUri={spotifyUri} activeReview={activeReview} />
-      </StyledApp>
-    );
+    return [
+      <Navbar key="navbar" />,
+      <Main key="main">
+        <ReviewsWrapper hasContent={!isEmpty(this.state.reviews)}>
+          {this.state.reviews.map(review => (
+            <ReviewBox
+              review={review}
+              key={review.url}
+              isExpanded={expandedReviewUrl === review.url}
+              onExpandReview={this.handleExpandReview}
+              onGetSpotifyUri={this.handleGetSpotifyUri}
+              onUpdateActiveAlbum={this.handleUpdateActiveAlbum}
+            />
+          ))}
+        </ReviewsWrapper>
+        {this.state.isFetching && <Fetching />}
+        {this.state.error && <h2>{this.state.error}</h2>}
+      </Main>,
+    ];
   }
 }
 

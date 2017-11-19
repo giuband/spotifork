@@ -2,7 +2,13 @@ import React from 'react';
 import { shape, string, bool, func } from 'prop-types';
 import { get } from 'lodash';
 import styled, { css, keyframes } from 'styled-components';
-import { SERVER_URL } from './constants';
+import {
+  SERVER_URL,
+  SERIF_FONT,
+  SANS_SERIF_FONT,
+  palette,
+  ACTIVE_ELEMENT,
+} from './constants';
 
 const ART_SIZE = '240px';
 const SCORE_SIZE = '30px';
@@ -17,6 +23,27 @@ const appearAnimation = keyframes`
   }
 `;
 
+const CoverArt = styled.div`
+  position: relative;
+  background-image: ${props => `url("${props.src}")`};
+  height: ${ART_SIZE};
+  background-size: cover;
+  position: relative;
+  z-index: 1;
+
+  &:before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    content: '';
+    background-color: ${palette.gray0};
+    opacity: 0.3;
+    transition: opacity 0.2s ease-in;
+  }
+`;
+
 const StyledReviewBox = styled.li`
   flex-basis: ${ART_SIZE};
   margin-right: 10px;
@@ -24,35 +51,56 @@ const StyledReviewBox = styled.li`
   margin-left: 10px;
   cursor: pointer;
   padding-bottom: 5px;
+  position: relative;
 
   ${props => props.expanded && css`box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);`};
 
   animation: ${appearAnimation} 0.5s ease-out;
+
+  &:after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: white;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in;
+    box-shadow: 0 0 10px ${palette.gray2};
+    content: '';
+  }
+
+  ${ACTIVE_ELEMENT} {
+    opacity: 1;
+
+    &:after {
+      opacity: 1;
+    }
+
+    ${CoverArt}:before {
+      opacity: 0;
+    }
+  }
 `;
 
 const Artist = styled.h3`
-  text-transform: uppercase;
-  font-family: Oswald, sans-serif;
-  font-size: 12px;
   text-align: center;
-  color: #444;
   margin-bottom: 3px;
+  ${SERIF_FONT} font-weight: 700;
+  font-size: 1em;
+  color: ${palette.gray1};
+  position: relative;
+  z-index: 1;
 `;
 
 const Title = styled.p`
-  font-family: Lora, sans-serif;
-  font-style: italic;
-  color: #444;
+  ${SANS_SERIF_FONT} color: ${palette.gray1};
   margin-top: 0;
   text-align: center;
-  font-size: 12px;
-`;
-
-const CoverArt = styled.div`
+  font-size: 0.75em;
   position: relative;
-  background-image: ${props => `url("${props.src}")`};
-  height: ${ART_SIZE};
-  background-size: cover;
+  z-index: 1;
 `;
 
 const Score = styled.div`
@@ -69,26 +117,7 @@ const Score = styled.div`
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
   border-radius: 50%;
   padding: 4px;
-`;
-
-const ReadReviewLink = styled.a`
-  display: block;
-  text-align: center;
-  color: #ff490e;
-  margin-top: 10px;
-  font-family: Lora, sans-serif;
-  font-size: 10px;
-`;
-
-const Iframe = styled.iframe`
-  display: block;
-  margin: 0 auto;
-`;
-
-const NotAvailableError = styled.h3`
-  text-align: center;
-  width: 90%;
-  margin: 0 auto;
+  z-index: 1;
 `;
 
 class ReviewBox extends React.Component {
@@ -122,7 +151,9 @@ class ReviewBox extends React.Component {
     } else if (error) {
       onUpdateActiveAlbum({ review });
     } else {
-      fetch(`${SERVER_URL}/search?artist=${review.artist}&album=${review.album}`)
+      fetch(
+        `${SERVER_URL}/search?artist=${review.artist}&album=${review.album}`
+      )
         .then(response => response.json())
         .then(data => {
           if (data.uri) {
@@ -134,39 +165,6 @@ class ReviewBox extends React.Component {
           }
         });
     }
-  }
-
-  renderExpandedSection() {
-    const { spotifyUri, error } = this.state;
-    const { review } = this.props;
-    const readReview = (
-      <ReadReviewLink
-        key="review-link"
-        href={`https://pitchfork.com${review.url}`}
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Read review
-      </ReadReviewLink>
-    );
-    if (error) {
-      return [<NotAvailableError key="error">{error}</NotAvailableError>, readReview];
-    }
-    if (spotifyUri) {
-      return [
-        <Iframe
-          key="spotify-iframe"
-          src={`https://open.spotify.com/embed?uri=${spotifyUri}&view=coverart`}
-          width="90%"
-          height="80"
-          frameBorder="0"
-          allowTransparency="true"
-          title="spotify-player"
-        />,
-        readReview,
-      ];
-    }
-    return null;
   }
 
   render() {
@@ -188,7 +186,6 @@ class ReviewBox extends React.Component {
         </CoverArt>
         <Artist>{review.artist}</Artist>
         <Title>{review.album}</Title>
-        {isExpanded && this.renderExpandedSection()}
       </StyledReviewBox>
     );
   }

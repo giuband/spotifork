@@ -1,4 +1,3 @@
-import React from 'react';
 import styled, { keyframes } from 'styled-components';
 
 const SIZE = '50px';
@@ -32,8 +31,4 @@ const StyledFetching = styled.div`
   }
 `;
 
-const Fetching = () => {
-  return <StyledFetching />;
-};
-
-export default Fetching;
+export default StyledFetching;
