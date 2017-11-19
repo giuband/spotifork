@@ -8,7 +8,7 @@ import {
   SANS_SERIF_FONT,
   palette,
   ACTIVE_ELEMENT,
-} from './constants';
+} from '../../constants';
 
 const ART_SIZE = '240px';
 const SCORE_SIZE = '30px';
@@ -53,8 +53,6 @@ const StyledReviewBox = styled.li`
   padding-bottom: 5px;
   position: relative;
 
-  ${props => props.expanded && css`box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);`};
-
   animation: ${appearAnimation} 0.5s ease-out;
 
   &:after {
@@ -67,12 +65,13 @@ const StyledReviewBox = styled.li`
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease-in;
-    box-shadow: 0 0 10px ${palette.gray2};
+    box-shadow: 0 0 20px ${palette.gray2};
     content: '';
   }
 
   ${ACTIVE_ELEMENT} {
     opacity: 1;
+    outline: none;
 
     &:after {
       opacity: 1;
@@ -127,7 +126,6 @@ class ReviewBox extends React.Component {
       artist: string,
       album: string,
     }),
-    isExpanded: bool,
     onUpdateActiveAlbum: func,
   };
 
@@ -145,7 +143,7 @@ class ReviewBox extends React.Component {
   handleClick() {
     const { spotifyUri, error } = this.state;
     const { review, onUpdateActiveAlbum } = this.props;
-    this.props.onExpandReview(review.url);
+    this.props.onExpandReview(review);
     if (spotifyUri) {
       onUpdateActiveAlbum({ spotifyUri, review });
     } else if (error) {
@@ -168,7 +166,7 @@ class ReviewBox extends React.Component {
   }
 
   render() {
-    const { review, isExpanded } = this.props;
+    const { review } = this.props;
     return (
       <StyledReviewBox
         role="button"
@@ -179,7 +177,6 @@ class ReviewBox extends React.Component {
             this.handleClick();
           }
         }}
-        expanded={isExpanded}
       >
         <CoverArt src={review.cover}>
           <Score>{review.score}</Score>

@@ -8,7 +8,7 @@ import {
   SERIF_FONT,
   SANS_SERIF_FONT,
   ACTIVE_ELEMENT,
-} from './constants';
+} from '../../constants';
 
 const NavBarContainer = styled.header`
   background-color: ${palette.gray0};

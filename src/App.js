@@ -1,25 +1,16 @@
 import React, { Component } from 'react';
-import styled, { injectGlobal } from 'styled-components';
-import { throttle, times, isEmpty } from 'lodash';
+import { injectGlobal } from 'styled-components';
+import { throttle, times } from 'lodash';
 
-import { SERVER_URL, CONTENT_WIDTH } from './constants';
+import { SERVER_URL } from './constants';
 
-import Navbar from './Navbar';
-import ReviewBox from './ReviewBox';
-import ReviewsWrapper from './ReviewsWrapper';
-import Fetching from './Fetching';
+import Main from './screens/main/Main';
+import Focus from './screens/focus/Focus';
 
 injectGlobal`
   body { 
     font-size: 16px;
   }
-`
-
-const Main = styled.main`
-  margin-top: 40px;
-  margin-bottom: 40px;
-
-  ${CONTENT_WIDTH}
 `;
 
 class App extends Component {
@@ -28,7 +19,7 @@ class App extends Component {
     fetchedPages: 0,
     isFetching: false,
     initialPagesToFetch: 2,
-    expandedReviewUrl: '',
+    expandedReview: null,
     spotifyUri: '',
     error: '',
   };
@@ -63,12 +54,12 @@ class App extends Component {
     }
   }
 
-  handleExpandReview(reviewUrl) {
-    this.setState({ expandedReviewUrl: reviewUrl });
+  handleExpandReview(review) {
+    this.setState({ expandedReview: review });
   }
 
-  handleUpdateActiveAlbum({ spotifyUri, review }) {
-    this.setState({ spotifyUri, activeReview: review });
+  handleUpdateActiveAlbum({ spotifyUri }) {
+    this.setState({ spotifyUri });
   }
 
   getReviewsForPage(pageIndex) {
@@ -94,26 +85,19 @@ class App extends Component {
   }
 
   render() {
-    const { expandedReviewUrl, spotifyUri, activeReview } = this.state;
-    return [
-      <Navbar key="navbar" />,
-      <Main key="main">
-        <ReviewsWrapper hasContent={!isEmpty(this.state.reviews)}>
-          {this.state.reviews.map(review => (
-            <ReviewBox
-              review={review}
-              key={review.url}
-              isExpanded={expandedReviewUrl === review.url}
-              onExpandReview={this.handleExpandReview}
-              onGetSpotifyUri={this.handleGetSpotifyUri}
-              onUpdateActiveAlbum={this.handleUpdateActiveAlbum}
-            />
-          ))}
-        </ReviewsWrapper>
-        {this.state.isFetching && <Fetching />}
-        {this.state.error && <h2>{this.state.error}</h2>}
-      </Main>,
-    ];
+    const { expandedReview, spotifyUri, reviews } = this.state;
+    return expandedReview ? (
+      <Focus spotifyUri={spotifyUri} activeReview={expandedReview} />
+    ) : (
+      <Main
+        reviews={reviews}
+        onExpandReview={this.handleExpandReview}
+        onGetSpotifyUri={this.handleGetSpotifyUri}
+        onUpdateActiveAlbum={this.handleUpdateActiveAlbum}
+        isFetching={this.state.isFetching}
+        error={this.state.error}
+      />
+    );
   }
 }
 

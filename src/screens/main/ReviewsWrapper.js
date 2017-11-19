@@ -1,7 +1,7 @@
 // @flow
 import React, { type Node } from 'react';
 import styled from 'styled-components';
-import { palette } from './constants';
+import { palette } from '../../constants';
 
 const StyledContainer = styled.ul`
   display: flex;

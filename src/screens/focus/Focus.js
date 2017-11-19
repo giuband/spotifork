@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { RIGHT_SIDEBAR_WIDTH } from './constants';
+import { RIGHT_SIDEBAR_WIDTH } from '../../constants';
 
 const AsideContainer = styled.aside`
   position: fixed;
@@ -24,8 +24,6 @@ class Aside extends React.Component {
     const { spotifyUri, activeReview } = this.props;
     return (
       <AsideContainer>
-        <h1>Spotifork</h1>
-        <p>Developed by Giuseppe Bandiera</p>
         {spotifyUri && (
           <iframe
             title="embedded-spotify"
