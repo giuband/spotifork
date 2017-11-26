@@ -87,7 +87,11 @@ class App extends Component {
   render() {
     const { expandedReview, spotifyUri, reviews } = this.state;
     return expandedReview ? (
-      <Focus spotifyUri={spotifyUri} activeReview={expandedReview} />
+      <Focus
+        spotifyUri={spotifyUri}
+        activeReview={expandedReview}
+        onGoBack={this.handleExpandReview}
+      />
     ) : (
       <Main
         reviews={reviews}

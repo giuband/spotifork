@@ -21,6 +21,7 @@ NavBarContainer.displayName = 'NavBarContainer';
 
 const NavBarContent = styled.div`
   display: flex;
+  flex-direction: column;
   position: absolute;
   top: 50%;
   left: 0;
@@ -29,6 +30,10 @@ const NavBarContent = styled.div`
   justify-content: space-between;
   align-items: middle;
   ${CONTENT_WIDTH};
+
+  @media screen and (min-width: 615px) {
+    flex-direction: row;
+  }
 `;
 
 const PageTitle = styled.h1`
@@ -48,12 +53,17 @@ const PageSubtitle = styled.h3`
   ${SANS_SERIF_FONT};
 `;
 
-const RightContentContainer = styled.nav`align-self: center;`;
+const RightContentContainer = styled.nav`
+  @media screen and (min-width: 615px) {
+    align-self: center;
+  }
+`;
 
 const RightContentContainerList = styled.ul`
   list-style: none;
   padding-left: 0;
   display: flex;
+  margin: 10px 0;
 `;
 const RightContentContainerListItem = styled.li`
   &:not(:last-of-type) {
