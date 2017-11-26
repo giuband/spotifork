@@ -38,6 +38,8 @@ export const palette = {
   white1: '#F5F5F5'
 }
 
+export const SLIDE_CARD_ANIMATION_DURATION = '500ms'
+
 export const ACTIVE_ELEMENT = `
   &:hover, &:active, &:focus
 `

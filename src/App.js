@@ -1,8 +1,13 @@
 import React, { Component } from 'react';
-import { injectGlobal } from 'styled-components';
+import styled, { injectGlobal } from 'styled-components';
 import { throttle, times } from 'lodash';
+import Transition from 'react-transition-group/Transition';
 
-import { SERVER_URL } from './constants';
+import {
+  SERVER_URL,
+  palette,
+  SLIDE_CARD_ANIMATION_DURATION,
+} from './constants';
 
 import Main from './screens/main/Main';
 import Focus from './screens/focus/Focus';
@@ -11,6 +16,11 @@ injectGlobal`
   body { 
     font-size: 16px;
   }
+`;
+
+const StyledContainer = styled.div`
+  height: 100vh;
+  position: relative;
 `;
 
 class App extends Component {
@@ -86,21 +96,35 @@ class App extends Component {
 
   render() {
     const { expandedReview, spotifyUri, reviews } = this.state;
-    return expandedReview ? (
-      <Focus
-        spotifyUri={spotifyUri}
-        activeReview={expandedReview}
-        onGoBack={this.handleExpandReview}
-      />
-    ) : (
-      <Main
-        reviews={reviews}
-        onExpandReview={this.handleExpandReview}
-        onGetSpotifyUri={this.handleGetSpotifyUri}
-        onUpdateActiveAlbum={this.handleUpdateActiveAlbum}
-        isFetching={this.state.isFetching}
-        error={this.state.error}
-      />
+    const inFocusMode = !!expandedReview;
+    return (
+      <StyledContainer>
+        <Transition
+          in={inFocusMode}
+          timeout={parseInt(SLIDE_CARD_ANIMATION_DURATION, 10)}
+        >
+          {(animationState) => (console.log(animationState), [
+            <Main
+              key="main"
+              reviews={reviews}
+              onExpandReview={this.handleExpandReview}
+              onGetSpotifyUri={this.handleGetSpotifyUri}
+              onUpdateActiveAlbum={this.handleUpdateActiveAlbum}
+              isFetching={this.state.isFetching}
+              error={this.state.error}
+              active={!inFocusMode}
+              isVisible={animationState !== 'entered'}
+            />,
+            <Focus
+              key="focus"
+              spotifyUri={spotifyUri}
+              activeReview={expandedReview}
+              onGoBack={this.handleExpandReview}
+              active={inFocusMode}
+            />,
+          ])}
+        </Transition>
+      </StyledContainer>
     );
   }
 }

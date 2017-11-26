@@ -1,6 +1,72 @@
 import React from 'react';
 import styled from 'styled-components';
-import { SERIF_FONT, SANS_SERIF_FONT, palette } from '../../constants';
+import {
+  SERIF_FONT,
+  SANS_SERIF_FONT,
+  palette,
+  SLIDE_CARD_ANIMATION_DURATION,
+} from '../../constants';
+
+const FixedContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  z-index: 0;
+  pointer-events: ${props => (props.active ? 'all' : 'none')};
+  overflow: ${props => (props.active ? 'auto' : 'hidden')};
+  background: ${props => (props.active ? palette.gray0 : 'transparent')};
+
+  &:focus {
+    outline: none;
+  }
+`;
+
+const FocusedReviewContainer = styled.div`
+  position: relative;
+  color: white;
+  width: 100vw;
+  min-height: 100vh;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  opacity: ${props => (props.active ? 1 : 0)};
+  transition: opacity ${SLIDE_CARD_ANIMATION_DURATION} ease-in-out;
+
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: ${props =>
+      props.activeReview
+        ? `url("${props.activeReview.cover}")`
+        : palette.gray0};
+    background-size: cover;
+    background-position: center;
+    z-index: -1;
+    filter: blur(10px);
+    transform: scale(1.1);
+  }
+
+  &:after {
+    content: '';
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: ${palette.gray0};
+    opacity: 0.4;
+    z-index: -1;
+    pointer-events: none;
+  }
+`;
 
 const GoBack = styled.div`
   cursor: pointer;
@@ -41,39 +107,6 @@ const HeaderMain = styled.div`
   text-align: center;
 `;
 
-const FocusedReviewContainer = styled.div`
-  position: relative;
-  color: white;
-  min-height: 100vh;
-
-  &:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background-image: url("${props => props.background}");
-    background-size: cover;
-    z-index: -1;
-    filter: blur(10px);
-    transform: scale(1.1);
-  }
-
-  &:after {
-    content: '';
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: #333;
-    opacity: 0.4;
-    z-index: -1;
-    pointer-events: none;
-  }
-`;
-
 const AlbumMeta = styled.dl`
   text-align: center;
 `;
@@ -92,19 +125,22 @@ const AlbumMetaDescription = styled.dd`
 const AlbumMetaItem = styled.div`
   display: flex;
   justify-content: center;
+  align-items: baseline;
 `;
 
 const ReadReviewLinkContainer = styled.div`
   text-align: center;
   margin-bottom: 0.2em;
-`
+`;
 
 const ReadReviewLink = styled.a`
   ${SANS_SERIF_FONT} text-align: center;
   font-size: 0.8em;
   color: ${palette.white};
 
-  &:active, &:hover, &:focus {
+  &:active,
+  &:hover,
+  &:focus {
     color: ${palette.white1};
   }
 `;
@@ -130,61 +166,87 @@ const SpotifyIframe = styled.iframe`
 `;
 
 class Aside extends React.Component {
+  state = {
+    lastActiveReview: null,
+  };
+
+  componentWillReceiveProps(nextProps) {
+    if (
+      nextProps.activeReview &&
+      nextProps.activeReview !== this.state.lastActiveReview
+    ) {
+      this.setState({ lastActiveReview: nextProps.activeReview });
+      if (this.container) {
+        this.container.focus()
+      }
+    }
+  }
+
   render() {
-    const { spotifyUri, activeReview, onGoBack } = this.props;
+    const { lastActiveReview } = this.state;
+    const { spotifyUri, onGoBack, active } = this.props;
     return (
-      <FocusedReviewContainer background={activeReview.cover}>
-        <Header>
-          <GoBack
-            role="button"
-            tabIndex={0}
-            onClick={() => onGoBack()}
-            onKeyDown={evt => {
-              if (evt.keyCode === 13) {
-                onGoBack();
-              }
-            }}
-          >
-            {'<'}
-          </GoBack>
-          <HeaderMain>
-            <Artist>{activeReview.artist}</Artist>
-            <Album>{activeReview.album}</Album>
-            <Rating>{activeReview.score}</Rating>
-          </HeaderMain>
-        </Header>
-        <AlbumMeta>
-          <AlbumMetaItem>
-            <AlbumMetaTitle>Label:</AlbumMetaTitle>
-            <AlbumMetaDescription>{activeReview.label}</AlbumMetaDescription>
-          </AlbumMetaItem>
-          <AlbumMetaItem>
-            <AlbumMetaTitle>Release Date:</AlbumMetaTitle>
-            <AlbumMetaDescription>{activeReview.label}</AlbumMetaDescription>
-          </AlbumMetaItem>
-        </AlbumMeta>
-        <Abstract>{activeReview.editorial.abstract}</Abstract>
-        <ReadReviewLinkContainer>
-          <ReadReviewLink
-            key="review-link"
-            href={`https://pitchfork.com${activeReview.url}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read review
-          </ReadReviewLink>
-        </ReadReviewLinkContainer>
-        {spotifyUri && (
-          <SpotifyIframe
-            title="embedded-spotify"
-            src={`https://open.spotify.com/embed?uri=${spotifyUri}`}
-            width="300"
-            height="380"
-            frameBorder="0"
-            allowTransparency
-          />
-        )}
-      </FocusedReviewContainer>
+      <FixedContainer
+        active={active}
+        innerRef={container => (this.container = container)}
+        role="presentation"
+        tabIndex={0}
+      >
+        <FocusedReviewContainer activeReview={lastActiveReview} active={active}>
+          {lastActiveReview && (
+            <div>
+              <Header>
+                <GoBack
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onGoBack()}
+                  onKeyDown={evt => {
+                    if (evt.keyCode === 13) {
+                      onGoBack();
+                    }
+                  }}
+                >
+                  {'<'}
+                </GoBack>
+                <HeaderMain>
+                  <Artist>{lastActiveReview.artist}</Artist>
+                  <Album>{lastActiveReview.album}</Album>
+                  <Rating>{lastActiveReview.score}</Rating>
+                </HeaderMain>
+              </Header>
+              <AlbumMeta>
+                <AlbumMetaItem>
+                  <AlbumMetaTitle>Label:</AlbumMetaTitle>
+                  <AlbumMetaDescription>
+                    {lastActiveReview.label}
+                  </AlbumMetaDescription>
+                </AlbumMetaItem>
+              </AlbumMeta>
+              <Abstract>{lastActiveReview.editorial.abstract}</Abstract>
+              <ReadReviewLinkContainer>
+                <ReadReviewLink
+                  key="review-link"
+                  href={`https://pitchfork.com${lastActiveReview.url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Read review
+                </ReadReviewLink>
+              </ReadReviewLinkContainer>
+              {spotifyUri && (
+                <SpotifyIframe
+                  title="embedded-spotify"
+                  src={`https://open.spotify.com/embed?uri=${spotifyUri}`}
+                  width="300"
+                  height="380"
+                  frameBorder="0"
+                  allowTransparency
+                />
+              )}
+            </div>
+          )}
+        </FocusedReviewContainer>
+      </FixedContainer>
     );
   }
 }
