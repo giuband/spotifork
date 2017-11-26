@@ -165,6 +165,15 @@ const SpotifyIframe = styled.iframe`
   box-shadow: 0 0 50px rgba(20, 20, 20, 1);
 `;
 
+const SpotifyError = styled.h2`
+  text-align: center;
+  padding-left: 20px;
+  padding-right: 20px;
+  font-style: italic;
+  font-size: 2em;
+  ${SERIF_FONT}
+`;
+
 class Aside extends React.Component {
   state = {
     lastActiveReview: null,
@@ -177,14 +186,14 @@ class Aside extends React.Component {
     ) {
       this.setState({ lastActiveReview: nextProps.activeReview });
       if (this.container) {
-        this.container.focus()
+        this.container.focus();
       }
     }
   }
 
   render() {
     const { lastActiveReview } = this.state;
-    const { spotifyUri, onGoBack, active } = this.props;
+    const { spotifyUri, onGoBack, active, spotifyError } = this.props;
     return (
       <FixedContainer
         active={active}
@@ -242,6 +251,11 @@ class Aside extends React.Component {
                   frameBorder="0"
                   allowTransparency
                 />
+              )}
+              {spotifyError && (
+                <SpotifyError>
+                  This album is not available on Spotify.
+                </SpotifyError>
               )}
             </div>
           )}

@@ -3,11 +3,7 @@ import styled, { injectGlobal } from 'styled-components';
 import { throttle, times } from 'lodash';
 import Transition from 'react-transition-group/Transition';
 
-import {
-  SERVER_URL,
-  palette,
-  SLIDE_CARD_ANIMATION_DURATION,
-} from './constants';
+import { SERVER_URL, SLIDE_CARD_ANIMATION_DURATION } from './constants';
 
 import Main from './screens/main/Main';
 import Focus from './screens/focus/Focus';
@@ -32,6 +28,7 @@ class App extends Component {
     expandedReview: null,
     spotifyUri: '',
     error: '',
+    spotifyError: false,
   };
 
   constructor() {
@@ -65,11 +62,15 @@ class App extends Component {
   }
 
   handleExpandReview(review) {
-    this.setState({ expandedReview: review });
+    this.setState({ expandedReview: review, spotifyError: false });
   }
 
   handleUpdateActiveAlbum({ spotifyUri }) {
-    this.setState({ spotifyUri });
+    if (spotifyUri) {
+      this.setState({ spotifyUri, spotifyError: false });
+    } else {
+      this.setState({ spotifyUri: null, spotifyError: true });
+    }
   }
 
   getReviewsForPage(pageIndex) {
@@ -95,7 +96,7 @@ class App extends Component {
   }
 
   render() {
-    const { expandedReview, spotifyUri, reviews } = this.state;
+    const { expandedReview, spotifyUri, reviews, spotifyError } = this.state;
     const inFocusMode = !!expandedReview;
     return (
       <StyledContainer>
@@ -103,7 +104,7 @@ class App extends Component {
           in={inFocusMode}
           timeout={parseInt(SLIDE_CARD_ANIMATION_DURATION, 10)}
         >
-          {(animationState) => (console.log(animationState), [
+          {animationState => [
             <Main
               key="main"
               reviews={reviews}
@@ -121,8 +122,9 @@ class App extends Component {
               activeReview={expandedReview}
               onGoBack={this.handleExpandReview}
               active={inFocusMode}
+              spotifyError={spotifyError}
             />,
-          ])}
+          ]}
         </Transition>
       </StyledContainer>
     );

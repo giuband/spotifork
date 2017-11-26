@@ -109,14 +109,14 @@ const Score = styled.div`
   color: white;
   width: ${SCORE_SIZE};
   height: ${SCORE_SIZE};
-  font-size: 18px;
+  font-size: 1em;
   line-height: ${SCORE_SIZE};
   text-align: center;
-  background: #333;
+  background: rgba(51, 51, 51, 0.8);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
-  border-radius: 50%;
   padding: 4px;
   z-index: 1;
+  ${SANS_SERIF_FONT};
 `;
 
 class ReviewBox extends React.Component {
@@ -144,10 +144,8 @@ class ReviewBox extends React.Component {
     const { spotifyUri, error } = this.state;
     const { review, onUpdateActiveAlbum } = this.props;
     this.props.onExpandReview(review);
-    if (spotifyUri) {
-      onUpdateActiveAlbum({ spotifyUri, review });
-    } else if (error) {
-      onUpdateActiveAlbum({ review });
+    if (spotifyUri || error ) {
+      onUpdateActiveAlbum({ spotifyUri });
     } else {
       fetch(
         `${SERVER_URL}/search?artist=${review.artist}&album=${review.album}`
@@ -156,10 +154,10 @@ class ReviewBox extends React.Component {
         .then(data => {
           if (data.uri) {
             this.setState({ spotifyUri: data.uri, spotifyData: data });
-            onUpdateActiveAlbum({ spotifyUri: data.uri, review });
+            onUpdateActiveAlbum({ spotifyUri: data.uri });
           } else if (get(data, 'error') === 'Not available on spotify') {
             this.setState({ error: 'Album not available on Spotify' });
-            onUpdateActiveAlbum({ review });
+            onUpdateActiveAlbum({ spotifyUri });
           }
         });
     }
