@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+  node-app:
+    build: ./server
+    ports:
+      - "5000:5000"
+    depends_on:
+      - react-js-app
+      - redis
+
+  react-js-app:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+
+  redis:
+    image: redis

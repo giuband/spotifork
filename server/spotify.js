@@ -1,7 +1,7 @@
 const { get } = require('lodash');
 const request = require('request');
 
-const { CLIENT_ID, CLIENT_SECRET } = require('./keys');
+const { CLIENT_ID, CLIENT_SECRET } = require('./spotify-keys');
 
 function btoa(str) {
   if (Buffer.byteLength(str) !== str.length) throw new Error('bad string!');

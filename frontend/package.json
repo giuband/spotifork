@@ -1,23 +1,19 @@
 {
-  "name": "spotifork",
+  "name": "spotifork-frontend",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "express": "^4.16.2",
     "flow-bin": "^0.59.0",
     "lodash": "^4.17.4",
     "normalize.css": "^7.0.0",
-    "pitchfork": "^0.0.15",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-scripts": "1.0.14",
     "react-transition-group": "^2.2.1",
-    "request": "^2.83.0",
     "styled-components": "^2.2.2"
   },
   "scripts": {
-    "start": "node server/server.js",
-    "start-react": "react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
