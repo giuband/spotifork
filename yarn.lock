@@ -4863,9 +4863,9 @@ pinkie@^2.0.0:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/pinkie/-/pinkie-2.0.4.tgz#72556b80cfa0d48a974e80e77248e80ed4f7f870"
 
-pitchfork@^0.0.14:
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/pitchfork/-/pitchfork-0.0.14.tgz#b6e0d9ff4574c1e11cce5f3709c6138dff88e58d"
+pitchfork@^0.0.15:
+  version "0.0.15"
+  resolved "https://registry.yarnpkg.com/pitchfork/-/pitchfork-0.0.15.tgz#c0a246e5a3de4f331cba45efc6d60526762b1e7a"
   dependencies:
     async "^0.9.0"
     cheerio "~0.22.0"

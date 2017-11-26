@@ -7,7 +7,7 @@
     "flow-bin": "^0.59.0",
     "lodash": "^4.17.4",
     "normalize.css": "^7.0.0",
-    "pitchfork": "^0.0.14",
+    "pitchfork": "^0.0.15",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-scripts": "1.0.14",
