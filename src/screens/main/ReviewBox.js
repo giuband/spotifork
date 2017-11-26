@@ -1,7 +1,7 @@
+// @flow
 import React from 'react';
-import { shape, string, bool, func } from 'prop-types';
 import { get } from 'lodash';
-import styled, { css, keyframes } from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import {
   SERVER_URL,
   SERIF_FONT,
@@ -9,6 +9,7 @@ import {
   palette,
   ACTIVE_ELEMENT,
 } from '../../constants';
+import { type ReviewType, type SpotifyAlbumType } from '../../types'
 
 const ART_SIZE = '240px';
 const SCORE_SIZE = '30px';
@@ -119,15 +120,17 @@ const Score = styled.div`
   ${SANS_SERIF_FONT};
 `;
 
-class ReviewBox extends React.Component {
-  static propTypes = {
-    review: shape({
-      url: string,
-      artist: string,
-      album: string,
-    }),
-    onUpdateActiveAlbum: func,
-  };
+type Props = {
+  review: ReviewType,
+  onUpdateActiveAlbum: ?string => void,
+  onExpandReview: ReviewType => void,
+}
+
+class ReviewBox extends React.Component<Props, {
+  spotifyUri: ?string,
+  spotifyData: ?SpotifyAlbumType,
+  error: ?string,
+}> {
 
   state = {
     spotifyUri: '',
@@ -135,17 +138,18 @@ class ReviewBox extends React.Component {
     error: null,
   };
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
   }
 
+  handleClick: void => void
   handleClick() {
     const { spotifyUri, error } = this.state;
     const { review, onUpdateActiveAlbum } = this.props;
     this.props.onExpandReview(review);
     if (spotifyUri || error ) {
-      onUpdateActiveAlbum({ spotifyUri });
+      onUpdateActiveAlbum(spotifyUri);
     } else {
       fetch(
         `${SERVER_URL}/search?artist=${review.artist}&album=${review.album}`
@@ -154,10 +158,10 @@ class ReviewBox extends React.Component {
         .then(data => {
           if (data.uri) {
             this.setState({ spotifyUri: data.uri, spotifyData: data });
-            onUpdateActiveAlbum({ spotifyUri: data.uri });
+            onUpdateActiveAlbum(data.uri);
           } else if (get(data, 'error') === 'Not available on spotify') {
             this.setState({ error: 'Album not available on Spotify' });
-            onUpdateActiveAlbum({ spotifyUri });
+            onUpdateActiveAlbum(spotifyUri);
           }
         });
     }

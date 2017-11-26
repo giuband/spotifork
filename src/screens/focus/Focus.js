@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import styled from 'styled-components';
 import {
@@ -6,6 +7,8 @@ import {
   palette,
   SLIDE_CARD_ANIMATION_DURATION,
 } from '../../constants';
+
+import { type ReviewType } from '../../types'
 
 const FixedContainer = styled.div`
   position: fixed;
@@ -174,12 +177,24 @@ const SpotifyError = styled.h2`
   ${SERIF_FONT}
 `;
 
-class Aside extends React.Component {
+type Props = {
+  activeReview: ?ReviewType,
+  spotifyUri: ?string,
+  onGoBack: void => void,
+  active: boolean,
+  spotifyError: boolean,
+}
+
+class Focus extends React.Component<Props, {
+  lastActiveReview: ?ReviewType,
+}> {
+  container: HTMLDivElement;
+
   state = {
     lastActiveReview: null,
   };
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps: Props) {
     if (
       nextProps.activeReview &&
       nextProps.activeReview !== this.state.lastActiveReview
@@ -265,4 +280,4 @@ class Aside extends React.Component {
   }
 }
 
-export default Aside;
+export default Focus;

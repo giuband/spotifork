@@ -1,9 +1,11 @@
+// @flow
 import React, { Component } from 'react';
 import styled, { injectGlobal } from 'styled-components';
 import { throttle, times } from 'lodash';
 import Transition from 'react-transition-group/Transition';
 
 import { SERVER_URL, SLIDE_CARD_ANIMATION_DURATION } from './constants';
+import { type ReviewType } from './types';
 
 import Main from './screens/main/Main';
 import Focus from './screens/focus/Focus';
@@ -19,15 +21,27 @@ const StyledContainer = styled.div`
   position: relative;
 `;
 
-class App extends Component {
+const INITIAL_PAGES_TO_FETCH = 2;
+
+class App extends Component<
+  {},
+  {
+    reviews: Array<ReviewType>,
+    fetchedPages: number,
+    isFetching: boolean,
+    expandedReview: ?ReviewType,
+    spotifyUri: ?string,
+    error: ?string,
+    spotifyError: boolean,
+  }
+> {
   state = {
     reviews: [],
     fetchedPages: 0,
     isFetching: false,
-    initialPagesToFetch: 2,
     expandedReview: null,
-    spotifyUri: '',
-    error: '',
+    spotifyUri: null,
+    error: null,
     spotifyError: false,
   };
 
@@ -44,16 +58,21 @@ class App extends Component {
     document.addEventListener('scroll', throttle(this.handleScroll, 100));
   }
 
+  getInitialPagesContent: void => Promise<mixed>;
   getInitialPagesContent() {
-    const totalFetches = this.state.initialPagesToFetch;
+    const totalFetches = INITIAL_PAGES_TO_FETCH;
     const callbacks = times(totalFetches).map(i =>
       this.getReviewsForPage(i + 1)
     );
     return callbacks.reduce((prev, cur) => prev.then(cur), Promise.resolve());
   }
 
-  handleScroll(evt) {
+  handleScroll: void => void;
+  handleScroll() {
     const element = document.documentElement;
+    if (!element) {
+      return;
+    }
     const { scrollHeight, scrollTop, clientHeight } = element;
     const hasScrolledToBottom = scrollHeight - scrollTop === clientHeight;
     if (hasScrolledToBottom && !this.state.isFetching) {
@@ -61,11 +80,13 @@ class App extends Component {
     }
   }
 
-  handleExpandReview(review) {
+  handleExpandReview: ?ReviewType => void;
+  handleExpandReview(review: ?ReviewType) {
     this.setState({ expandedReview: review, spotifyError: false });
   }
 
-  handleUpdateActiveAlbum({ spotifyUri }) {
+  handleUpdateActiveAlbum: ?string => void;
+  handleUpdateActiveAlbum(spotifyUri: ?string) {
     if (spotifyUri) {
       this.setState({ spotifyUri, spotifyError: false });
     } else {
@@ -73,13 +94,15 @@ class App extends Component {
     }
   }
 
-  getReviewsForPage(pageIndex) {
+  getReviewsForPage: number => Promise<mixed>;
+  getReviewsForPage(pageIndex: number) {
     const getReviewsUrl = `${SERVER_URL}/getPage/${pageIndex}`;
     this.setState({ isFetching: true });
     return fetch(getReviewsUrl)
       .then(response => response.json())
       .then(data => {
-        this.addReviews(data);
+        const { reviews } = data;
+        this.addReviews(reviews);
         this.setState({
           fetchedPages: this.state.fetchedPages + 1,
           isFetching: false,
@@ -91,7 +114,8 @@ class App extends Component {
       });
   }
 
-  addReviews({ reviews }) {
+  addReviews: (reviews: Array<ReviewType>) => void;
+  addReviews(reviews: Array<ReviewType>) {
     this.setState({ reviews: [...this.state.reviews, ...reviews] });
   }
 
@@ -109,7 +133,6 @@ class App extends Component {
               key="main"
               reviews={reviews}
               onExpandReview={this.handleExpandReview}
-              onGetSpotifyUri={this.handleGetSpotifyUri}
               onUpdateActiveAlbum={this.handleUpdateActiveAlbum}
               isFetching={this.state.isFetching}
               error={this.state.error}

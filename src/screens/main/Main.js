@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import { isEmpty } from 'lodash';
 import styled from 'styled-components';
@@ -12,6 +13,8 @@ import Navbar from './Navbar';
 import ReviewBox from './ReviewBox';
 import ReviewsWrapper from './ReviewsWrapper';
 import Fetching from './Fetching';
+
+import { type ReviewType } from '../../types'
 
 const MainContainer = styled.div`
   width: 100vw;
@@ -36,8 +39,20 @@ const MainContentWrapper = styled.main`
   ${CONTENT_WIDTH};
 `;
 
-class Main extends React.Component {
-  componentWillReceiveProps(nextProps) {
+type Props = {
+  reviews: Array<ReviewType>,
+  onExpandReview: ReviewType => void,
+  onUpdateActiveAlbum: ?string => void,
+  isFetching: boolean,
+  error: ?string,
+  active: boolean,
+  isVisible: boolean,
+}
+
+class Main extends React.Component<Props> {
+  container: HTMLDivElement;
+
+  componentWillReceiveProps(nextProps: Props) {
     if (this.container && nextProps.active && !this.props.active) {
       this.container.focus();
     }
@@ -45,10 +60,9 @@ class Main extends React.Component {
 
   render() {
     const {
-      onExpandReview,
-      onGetSpotifyUri,
-      onUpdateActiveAlbum,
       reviews,
+      onExpandReview,
+      onUpdateActiveAlbum,
       isFetching,
       error,
       active,
@@ -71,7 +85,6 @@ class Main extends React.Component {
                 review={review}
                 key={review.url}
                 onExpandReview={onExpandReview}
-                onGetSpotifyUri={onGetSpotifyUri}
                 onUpdateActiveAlbum={onUpdateActiveAlbum}
               />
             ))}
