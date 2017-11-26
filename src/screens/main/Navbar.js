@@ -100,13 +100,21 @@ export default function Navbar() {
         <RightContentContainer>
           <RightContentContainerList>
             <RightContentContainerListItem>
-              <RightContentContainerListItemLink href="#">
+              <RightContentContainerListItemLink
+                href="//github.com/giuband/spotifork"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 View on github
               </RightContentContainerListItemLink>
             </RightContentContainerListItem>
             <RightContentContainerListItem>
-              <RightContentContainerListItemLink href="#">
-                Report an issue
+              <RightContentContainerListItemLink
+                href="//twitter.com/giuband"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Contact
               </RightContentContainerListItemLink>
             </RightContentContainerListItem>
           </RightContentContainerList>
