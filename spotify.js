@@ -56,9 +56,9 @@ const searchAlbumOnSpotify = ({ artist, album }) => {
           const hasTokenExpired =
             get(response, 'body.error.message') === 'The access token expired';
           if (hasTokenExpired) {
-            return updateAccessToken().then(() =>
-              searchAlbumOnSpotify({ artist, album })
-            );
+            return updateAccessToken()
+              .then(() => searchAlbumOnSpotify({ artist, album }))
+              .catch(reject);
           }
           resolve(response);
         }
