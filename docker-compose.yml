@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 services:
   node-app:
@@ -8,11 +8,16 @@ services:
     depends_on:
       - react-js-app
       - redis
+    volumes:
+      - ./spotifork:/spotifork-volume
 
   react-js-app:
     build: ./frontend
-    ports:
-      - "3000:3000"
+    volumes:
+      - ./spotifork:/spotifork-volume
 
   redis:
     image: redis
+
+volumes:
+  spotifork-volume: {}
