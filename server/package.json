@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "bluebird": "^3.5.1",
     "express": "^4.16.2",
     "lodash": "^4.17.4",
     "pitchfork": "^0.0.15",
+    "redis": "^2.8.0",
     "request": "^2.83.0"
   },
   "scripts": {
