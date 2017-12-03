@@ -1,11 +1,10 @@
 FROM node:carbon
-RUN mkdir spotifork
-WORKDIR spotifork
+RUN mkdir -p spotifork/frontend
+WORKDIR spotifork/frontend
 
 COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build
 
-CMD [ "/bin/true" ]
+CMD [ "npm", "run", "build" ]

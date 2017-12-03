@@ -1,6 +1,6 @@
 FROM node:carbon
-RUN mkdir spotifork
-WORKDIR spotifork
+RUN mkdir -p spotifork/server
+WORKDIR spotifork/server
 
 COPY package*.json ./
 RUN npm install

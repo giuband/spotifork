@@ -9,15 +9,12 @@ services:
       - react-js-app
       - redis
     volumes:
-      - ./spotifork:/spotifork-volume
+      - .:/spotifork
 
   react-js-app:
     build: ./frontend
     volumes:
-      - ./spotifork:/spotifork-volume
+      - .:/spotifork
 
   redis:
     image: redis
-
-volumes:
-  spotifork-volume: {}
