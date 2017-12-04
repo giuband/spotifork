@@ -13,7 +13,7 @@ const { searchAlbumOnSpotify } = require('./spotify');
 
 const app = express();
 app.set('view engine', 'jade');
-app.use(express.static(path.join(__dirname, '..', 'frontend/build')));
+app.use(express.static(path.join(__dirname, 'build')));
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
@@ -78,7 +78,7 @@ app.get('/search', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.render(path.join(__dirname, '..', 'frontend/build/index.html'));
+  res.render(path.join(__dirname, 'build/index.html'));
 });
 
 app.listen(5000, function() {
