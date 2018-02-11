@@ -1,10 +1,10 @@
 // @flow
 import React, { Component } from 'react';
 import styled, { injectGlobal } from 'styled-components';
+import { withRouter, type RouterHistory } from 'react-router-dom';
 import { throttle, times } from 'lodash';
-import Transition from 'react-transition-group/Transition';
 
-import { SERVER_URL, SLIDE_CARD_ANIMATION_DURATION } from './constants';
+import { SERVER_URL } from './constants';
 import { type ReviewType } from './types';
 
 import Main from './screens/main/Main';
@@ -13,6 +13,10 @@ import Focus from './screens/focus/Focus';
 injectGlobal`
   body { 
     font-size: 16px;
+
+    &.scroll-block {
+      overflow-y: hidden;
+    }
   }
 `;
 
@@ -23,18 +27,21 @@ const StyledContainer = styled.div`
 
 const INITIAL_PAGES_TO_FETCH = 2;
 
-class App extends Component<
-  {},
-  {
-    reviews: Array<ReviewType>,
-    fetchedPages: number,
-    isFetching: boolean,
-    expandedReview: ?ReviewType,
-    spotifyUri: ?string,
-    error: ?string,
-    spotifyError: boolean,
-  }
-> {
+type State = {
+  reviews: Array<ReviewType>,
+  fetchedPages: number,
+  isFetching: boolean,
+  expandedReview: ?ReviewType,
+  spotifyUri: ?string,
+  error: ?string,
+  spotifyError: boolean,
+};
+
+type Props = {
+  history: RouterHistory,
+};
+
+class App extends Component<State, Props> {
   state = {
     reviews: [],
     fetchedPages: 0,
@@ -56,6 +63,28 @@ class App extends Component<
   componentDidMount() {
     this.getInitialPagesContent();
     document.addEventListener('scroll', throttle(this.handleScroll, 100));
+  }
+
+  componentWillUpdate(nextProps, nextState) {
+    const isGoingBack =
+      this.state.expandedReview && nextProps.history.location.pathname === '/';
+    const isGoingForward =
+      !nextState.expandedReview && nextProps.history.location.pathname !== '/';
+    if (isGoingBack) {
+      this.setState({ expandedReview: null });
+    } else if (isGoingForward) {
+      const artistMatch = nextProps.history.location.pathname.match(
+        /artist\/(.+)\/album\/(.+)/
+      );
+      if (artistMatch) {
+        const artist = decodeURIComponent(artistMatch[1]);
+        const album = decodeURIComponent(artistMatch[2]);
+        const focusedReview = this.state.reviews.find(
+          review => review.artist === artist && review.album === album
+        );
+        this.setState({ expandedReview: focusedReview });
+      }
+    }
   }
 
   getInitialPagesContent: void => Promise<mixed>;
@@ -80,12 +109,17 @@ class App extends Component<
     }
   }
 
-  handleExpandReview: ?ReviewType => void;
+  handleExpandReview: (?ReviewType) => void;
   handleExpandReview(review: ?ReviewType) {
+    const { history } = this.props;
     this.setState({ expandedReview: review, spotifyError: false });
+    const newUrl = review
+      ? `artist/${review.artist}/album/${review.album}`
+      : '/';
+    history.push(newUrl);
   }
 
-  handleUpdateActiveAlbum: ?string => void;
+  handleUpdateActiveAlbum: (?string) => void;
   handleUpdateActiveAlbum(spotifyUri: ?string) {
     if (spotifyUri) {
       this.setState({ spotifyUri, spotifyError: false });
@@ -124,34 +158,24 @@ class App extends Component<
     const inFocusMode = !!expandedReview;
     return (
       <StyledContainer>
-        <Transition
-          in={inFocusMode}
-          timeout={parseInt(SLIDE_CARD_ANIMATION_DURATION, 10)}
-        >
-          {animationState => [
-            <Main
-              key="main"
-              reviews={reviews}
-              onExpandReview={this.handleExpandReview}
-              onUpdateActiveAlbum={this.handleUpdateActiveAlbum}
-              isFetching={this.state.isFetching}
-              error={this.state.error}
-              active={!inFocusMode}
-              isVisible={animationState !== 'entered'}
-            />,
-            <Focus
-              key="focus"
-              spotifyUri={spotifyUri}
-              activeReview={expandedReview}
-              onGoBack={this.handleExpandReview}
-              active={inFocusMode}
-              spotifyError={spotifyError}
-            />,
-          ]}
-        </Transition>
+        <Main
+          reviews={reviews}
+          onExpandReview={this.handleExpandReview}
+          onUpdateActiveAlbum={this.handleUpdateActiveAlbum}
+          isFetching={this.state.isFetching}
+          error={this.state.error}
+          active={!inFocusMode}
+        />
+        <Focus
+          spotifyUri={spotifyUri}
+          activeReview={expandedReview}
+          onGoBack={this.handleExpandReview}
+          active={inFocusMode}
+          spotifyError={spotifyError}
+        />
       </StyledContainer>
     );
   }
 }
 
-export default App;
+export default withRouter(App);

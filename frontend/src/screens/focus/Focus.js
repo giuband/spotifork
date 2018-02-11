@@ -8,7 +8,7 @@ import {
   SLIDE_CARD_ANIMATION_DURATION,
 } from '../../constants';
 
-import { type ReviewType } from '../../types'
+import { type ReviewType } from '../../types';
 
 const FixedContainer = styled.div`
   position: fixed;
@@ -74,26 +74,29 @@ const FocusedReviewContainer = styled.div`
 const GoBack = styled.div`
   cursor: pointer;
   font-weight: bolder;
-  font-size: 4em;
+  font-size: 2em;
   position: absolute;
   left: 20px;
   transform: scaleY(1.6);
 `;
 
 const Artist = styled.h1`
-  ${SERIF_FONT} font-weight: 700;
+  ${SERIF_FONT};
+  font-weight: 700;
   font-size: 4em;
   margin: 0.7em 0 0.3em;
 `;
 
 const Album = styled.h2`
-  ${SERIF_FONT} font-style: italic;
+  ${SERIF_FONT};
+  font-style: italic;
   font-size: 2.5em;
   margin: 0;
 `;
 
 const Rating = styled.h3`
-  ${SANS_SERIF_FONT} font-size: 1.5em;
+  ${SANS_SERIF_FONT};
+  font-size: 1.5em;
   margin: 0.5em 0;
 `;
 
@@ -115,7 +118,8 @@ const AlbumMeta = styled.dl`
 `;
 
 const AlbumMetaTitle = styled.dt`
-  ${SERIF_FONT} font-weight: 700;
+  ${SERIF_FONT};
+  font-weight: 700;
   font-size: 1em;
 `;
 
@@ -137,7 +141,8 @@ const ReadReviewLinkContainer = styled.div`
 `;
 
 const ReadReviewLink = styled.a`
-  ${SANS_SERIF_FONT} text-align: center;
+  ${SANS_SERIF_FONT};
+  text-align: center;
   font-size: 0.8em;
   color: ${palette.white};
 
@@ -149,7 +154,8 @@ const ReadReviewLink = styled.a`
 `;
 
 const Abstract = styled.p`
-  ${SERIF_FONT} font-style: italic;
+  ${SERIF_FONT};
+  font-style: italic;
   font-size: 1.5em;
   max-width: 800px;
   padding-left: 20px;
@@ -174,7 +180,7 @@ const SpotifyError = styled.h2`
   padding-right: 20px;
   font-style: italic;
   font-size: 2em;
-  ${SERIF_FONT}
+  ${SERIF_FONT};
 `;
 
 type Props = {
@@ -183,11 +189,14 @@ type Props = {
   onGoBack: void => void,
   active: boolean,
   spotifyError: boolean,
-}
+};
 
-class Focus extends React.Component<Props, {
-  lastActiveReview: ?ReviewType,
-}> {
+class Focus extends React.Component<
+  Props,
+  {
+    lastActiveReview: ?ReviewType,
+  }
+> {
   container: HTMLDivElement;
 
   state = {
@@ -195,14 +204,22 @@ class Focus extends React.Component<Props, {
   };
 
   componentWillReceiveProps(nextProps: Props) {
+    const willOpen = nextProps.active && !this.props.active;
+    const willClose = !nextProps.active && this.props.active;
+    if (willOpen) {
+      window.document.body.classList.add('scroll-block');
+      if (this.container) {
+        this.container.focus();
+        this.container.scrollTop = 0;
+      }
+    } else if (willClose) {
+      window.document.body.classList.remove('scroll-block');
+    }
     if (
       nextProps.activeReview &&
       nextProps.activeReview !== this.state.lastActiveReview
     ) {
       this.setState({ lastActiveReview: nextProps.activeReview });
-      if (this.container) {
-        this.container.focus();
-      }
     }
   }
 

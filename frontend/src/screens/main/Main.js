@@ -14,7 +14,7 @@ import ReviewBox from './ReviewBox';
 import ReviewsWrapper from './ReviewsWrapper';
 import Fetching from './Fetching';
 
-import { type ReviewType } from '../../types'
+import { type ReviewType } from '../../types';
 
 const MainContainer = styled.div`
   width: 100vw;
@@ -24,8 +24,6 @@ const MainContainer = styled.div`
   background: ${palette.white};
 
   transition: transform ${SLIDE_CARD_ANIMATION_DURATION} ease-in-out;
-  height: ${props => (props.isVisible ? 'initial' : '0')};
-  overflow: ${props => (props.isVisible ? 'auto' : 'hidden')};
 
   &:focus {
     outline: none;
@@ -42,12 +40,12 @@ const MainContentWrapper = styled.main`
 type Props = {
   reviews: Array<ReviewType>,
   onExpandReview: ReviewType => void,
-  onUpdateActiveAlbum: ?string => void,
+  onUpdateActiveAlbum: (?string) => void,
   isFetching: boolean,
   error: ?string,
   active: boolean,
   isVisible: boolean,
-}
+};
 
 class Main extends React.Component<Props> {
   container: HTMLDivElement;
